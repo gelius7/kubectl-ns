@@ -1,0 +1,20 @@
+#!/bin/bash
+
+OS_NAME="$(uname | awk '{print tolower($0)}')"
+
+ISMAC=false
+if [ "${OS_NAME}" == "darwin" ]; then
+  ISMAC=true
+fi
+
+TITLE="Select namespace to set default"
+if [ ${ISMAC} ]; then
+  NAMESPACE=$(kubectl get ns | grep -v NAME | awk '{print $1}' | fzf --header="${TITLE}" --reverse --no-mouse --height=10 --bind=left:page-up,right:page-down)
+else
+  NAMESPACE=$(kubectl get ns | grep -v NAME | awk '{print $1}' | fzf --header="${TITLE}" --reverse --no-mouse --bind=left:page-up,right:page-down)
+fi
+#NAMESPACE=${1-default}
+
+echo "kubectl config set-context $(kubectl config current-context) --namespace=${NAMESPACE}"
+
+kubectl config set-context $(kubectl config current-context) --namespace=${NAMESPACE}
